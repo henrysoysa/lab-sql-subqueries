@@ -68,7 +68,9 @@ WHERE film_id IN(
 SELECT first_name, last_name, email
 FROM sakila.customer
 WHERE address_id IN
-( SELECT address_id FROM (
+( 
+	SELECT address_id 
+	FROM (
 	SELECT a.address_id, co.country
 	FROM sakila.address a
 	JOIN sakila.city c 
@@ -76,7 +78,7 @@ WHERE address_id IN
 	JOIN sakila.country co 
 	ON c.country_id = co.country_id
 	WHERE co.country = 'Canada'
-) as address_country
+	) as address_country
 );
 
 
@@ -103,7 +105,8 @@ WHERE film_id IN
 -- You can use the customer and payment tables to find the most profitable customer, i.e., the customer who has made the largest sum of payments.
 
 
-SELECT rental_id FROM sakila.payment
+SELECT rental_id 
+FROM sakila.payment
 WHERE customer_id = (
 	SELECT customer_id
 	FROM sakila.payment
@@ -120,7 +123,8 @@ WHERE film_id IN(
 	SELECT DISTINCT(film_id) -- gets unique film_ids in case of re-rentals
 	FROM sakila.inventory
 	WHERE inventory_id IN (
-		SELECT inventory_id FROM sakila.rental
+		SELECT inventory_id 
+        FROM sakila.rental
 		WHERE customer_id = (
 			SELECT customer_id
 			FROM sakila.payment
@@ -132,18 +136,21 @@ WHERE film_id IN(
 )
 ;
 
--- Retrieve the client_id and the total_amount_spent of those clients who spent more than the average of the total_amount spent by each client. 
+-- Retrieve the customer_id and the total_amount_spent of those clients who spent more than the average of the total_amount spent by each client. 
 -- You can use subqueries to accomplish this.
 
-SELECT SUM(amount) as total_amount, customer_id
+SELECT 
+	SUM(amount) as total_amount_spent, 
+	customer_id
 FROM sakila.payment
 GROUP BY customer_id
-HAVING total_amount > (
-	SELECT ROUND(AVG(total_amount),2) AS average_total_spent
+HAVING total_amount_spent > (
+	SELECT 
+		ROUND(AVG(total_amount),2) AS average_total_spent
 	FROM (
 		SELECT SUM(amount) as total_amount, customer_id
 		FROM sakila.payment
 		GROUP BY customer_id
 		) as customer_a
 	)
-ORDER BY total_amount ASC;
+ORDER BY total_amount_spent ASC;
